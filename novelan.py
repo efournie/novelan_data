@@ -5,11 +5,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-def get_temperatures(driver):
-    return driver.find_elements(By.CLASS_NAME, 'output_field')
+from constants import *
+from debug import dbg_temperatures
 
 # Settings
 heat_pump_ip = '192.168.1.44'
+debug = True
 
 # Login page
 driver = webdriver.Firefox()
@@ -35,8 +36,12 @@ _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAM
 
 # Temperatures
 # Get values
-temperatures = get_temperatures(driver)
-for t in temperatures:
-    print(t.text)
+temperatures = driver.find_elements(By.CLASS_NAME, 'output_field')
+temperatures_text = [t.text for t in temperatures]
+temperatures_values = [float(t.replace('°C', '').replace('°F', '').replace(' K', '')) 
+                        for t in temperatures_text]
+
+if debug:
+    dbg_temperatures(temperatures_values)
 
 driver.close()
