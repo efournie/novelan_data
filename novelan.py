@@ -10,28 +10,19 @@ from selenium.webdriver.support.wait import WebDriverWait
 from temperatures import Temperatures
 
 
-# Settings
-heat_pump_ip = '192.168.1.44'
-debug = True
-
-
-def write_temp(temperatures, temp_idx):
-    '''
-    '''
-    t = temperatures[temp_idx]
-
-
 def main():
     # Options
     parser = argparse.ArgumentParser(description='Read status of a Novelan heat pump')
+    parser.add_argument('-i', '--ip_address', type=str, help='IP address of the heat pump')
     parser.add_argument('-o', '--output', type=str, default='.', help='Output directory where files will be written')
+    parser.add_argument('-d', '--debug', action='store_true', help='Debug mode, print results')
     args = parser.parse_args()
 
     # Login page
     opts = Options()
     opts.headless = True
     driver = webdriver.Firefox(options=opts)
-    driver.get(f'http://{heat_pump_ip}/Webserver/index.html')
+    driver.get(f'http://{args.ip_address}/Webserver/index.html')
     _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//html/body')))
     assert 'Heatpump' in driver.title
     # Default password is empty, just send return 
@@ -59,7 +50,7 @@ def main():
                             for t in temperatures_text]
     temps = Temperatures(temperatures_values)
 
-    if debug:
+    if args.debug:
         temps.debug()
 
     driver.close()
