@@ -14,7 +14,7 @@ def main():
     # Options
     parser = argparse.ArgumentParser(description='Read status of a Novelan heat pump')
     parser.add_argument('-i', '--ip_address', type=str, help='IP address of the heat pump')
-    parser.add_argument('-o', '--output', type=str, default='.', help='Output directory where files will be written')
+    parser.add_argument('-o', '--output_dir', type=str, default='.', help='Output directory where CSV files will be written')
     parser.add_argument('-d', '--debug', action='store_true', help='Debug mode, print results')
     args = parser.parse_args()
 
@@ -52,6 +52,8 @@ def main():
 
     if args.debug:
         temps.debug()
+
+    temps.write_all(args.output_dir)
 
     driver.close()
 

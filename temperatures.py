@@ -1,10 +1,19 @@
+import os
+
 class Temperature:
+    '''Single temperature class'''
     def __init__(self, name, value=float('nan')):
         self.name = name
         self.value = value
+
+    def write_csv(self, filename):
+        '''Write temperature value in a CSV file named filename located in output_dir'''
+        with open(filename, 'a') as f:
+            f.write(f'{self.value} ,')
         
 
 class Temperatures():
+    '''Main temperatures class'''
     def __init__(self, temps):
         self.t_in = Temperature('Incoming temperature', temps[0])
         self.t_out = Temperature('Outgoing temperature', temps[1])
@@ -25,3 +34,9 @@ class Temperatures():
         values = self.__dict__
         for t in values:
             print(f'{values[t].name} : {values[t].value}°C')
+
+    def write_all(self, dir):
+        values = self.__dict__
+        for t in values:
+            filename = os.path.join(dir, f'{t}.csv')
+            values[t].write_csv(filename)
