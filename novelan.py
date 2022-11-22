@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -10,6 +11,10 @@ from selenium.webdriver.support.wait import WebDriverWait
 from temperatures import Temperatures
 
 
+def log(msg):
+    print(f'{datetime.now()} :', msg)
+
+
 def main():
     # Options
     parser = argparse.ArgumentParser(description='Read status of a Novelan heat pump')
@@ -19,16 +24,22 @@ def main():
     args = parser.parse_args()
 
     # Login page
+    if args.debug:
+        log('Initialization...')
     opts = Options()
     opts.headless = True
     driver = webdriver.Firefox(options=opts)
     driver.get(f'http://{args.ip_address}/Webserver/index.html')
     _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//html/body')))
     assert 'Heatpump' in driver.title
+    if args.debug:
+        log('Start page reached')
     # Default password is empty, just send return 
     elem = driver.find_element(By.ID, 'password_prompt_input')
     elem.clear()
     elem.send_keys(Keys.RETURN)
+    if args.debug:
+        log('Login sent')
 
     # Status page
     # Wait until page is loaded, then navigate to temperatures
@@ -41,6 +52,8 @@ def main():
     menu_elements = driver.find_elements_by_xpath("//ul[@class='nav']/li/ul/li")
     ActionChains(driver).move_to_element(menu_elements[0]).click().perform()
     _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'output_field')))
+    if args.debug:
+        log('Status page reached')
 
     # Temperatures
     # Get values
@@ -51,11 +64,14 @@ def main():
     temps = Temperatures(temperatures_values)
 
     if args.debug:
+        log('Temperatures values:')
         temps.debug()
 
     temps.write_all(args.output_dir)
 
     driver.close()
+    if args.debug:
+        log('Done.')
 
 
 if __name__ == '__main__':
