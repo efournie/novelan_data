@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -13,7 +14,9 @@ heat_pump_ip = '192.168.1.44'
 debug = True
 
 # Login page
-driver = webdriver.Firefox()
+Options = Options()
+Options.headless = True
+driver = webdriver.Firefox(options=Options)
 driver.get(f'http://{heat_pump_ip}/Webserver/index.html')
 _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//html/body')))
 assert 'Heatpump' in driver.title
