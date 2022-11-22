@@ -1,13 +1,15 @@
 # Novelan data
-This is a python script reading the status of a Novelan heat pump using selenium. I used it to get the main information from my LA 16.1HV, not sure if it would work with other models.
+This is a python script reading the status of a Novelan heat pump using selenium. I use it to get the main information from my LA 16.1HV, not sure if it would work with other models.
 
-The control unit of the heat pump needs to be on the same local network as the computer running the script, its address is set using the '--ip_address' option.
+The control unit of the heat pump needs to be on the same local network as the computer running the script, its address is passed using the '--ip_address' option.
 
-With the default heat pump settings, the password is left blank so we only need to send return on the login screen.
+With the default heat pump control unit settings, the password is left blank so we only need to send return on the login screen.
 
-The status page is as far as I know only available in german.
+The status page is as far as I know only available in german but the script parses the contents and return values descriptions in english when called with the '--debug' flag.
 
 The heat pump temperatures will be written in CSV files in the location set by the '--output_dir' argument. Current values will also be stored in *.temp files.
+
+The current values can be used as input for OpenHab items. Example item files are provided, the URL pointing to the temperature files should be modified to match the target system. 
 
 ## Requirements
 The script uses Selenium
