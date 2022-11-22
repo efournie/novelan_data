@@ -7,7 +7,7 @@ With the default heat pump settings, the password is left blank so we only need 
 
 The status page is as far as I know only available in german.
 
-The heat pump temperatures will be written in CSV files in the location set by the '--output_dir' argument. 
+The heat pump temperatures will be written in CSV files in the location set by the '--output_dir' argument. Current values will also be stored in *.temp files.
 
 ## Requirements
 The script uses Selenium
@@ -15,6 +15,11 @@ The script uses Selenium
 On a Debian-like system, the dependencies can be installed with:
 
     sudo apt install python3-selenium
+
+If the script is run on a Raspberry Pi with RaspberryOS, geckodriver must be installed:
+    wget https://github.com/mozilla/geckodriver/releases/download/v0.23.0/geckodriver-v0.23.0-arm7hf.tar.gz
+    tar xvzf geckodriver-v0.23.0-arm7hf.tar.gz && rm -f geckodriver-v0.23.0-arm7hf.tar.gz
+    sudo mv geckodriver /usr/local/bin/
 
 ## Usage
     usage: novelan.py [-h] [-i IP_ADDRESS] [-o OUTPUT_DIR] [-d]

@@ -7,9 +7,14 @@ class Temperature:
         self.value = value
 
     def write_csv(self, filename):
-        '''Write temperature value in a CSV file named filename located in output_dir'''
+        '''Write temperature value in a CSV file'''
         with open(filename, 'a') as f:
             f.write(f'{self.value} ,')
+
+    def write_value(self, filename):
+        '''Write current temperature value in a file. Contents of the file will be overwritten.'''
+        with open(filename, 'w') as f:
+            f.write(f'{self.value}')
         
 
 class Temperatures():
@@ -40,3 +45,5 @@ class Temperatures():
         for t in values:
             filename = os.path.join(dir, f'{t}.csv')
             values[t].write_csv(filename)
+            filename = os.path.join(dir, f'{t}.temp')
+            values[t].write_value(filename)
