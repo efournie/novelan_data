@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from temperatures import Temperatures
+from temperatures import HeatPumpStatus
 
 
 def log(msg):
@@ -61,7 +61,7 @@ def main():
     temperatures_text = [t.text for t in temperatures]
     temperatures_values = [float(t.replace('°C', '').replace('°F', '').replace(' K', '')) 
                             for t in temperatures_text]
-    temps = Temperatures(temperatures_values)
+    temps = HeatPumpStatus(temperatures_values)
 
     if args.debug:
         log('Temperatures values:')

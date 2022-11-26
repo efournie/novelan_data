@@ -17,8 +17,8 @@ class Temperature:
             f.write(f'{self.value}')
         
 
-class Temperatures():
-    '''Main temperatures class'''
+class HeatPumpStatus():
+    '''Global heat pump status class'''
     def __init__(self, temps):
         self.t_in = Temperature('Flow temperature', temps[0])
         self.t_out = Temperature('Return temperature', temps[1])

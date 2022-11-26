@@ -19,6 +19,7 @@ On a Debian-like system, the dependencies can be installed with:
     sudo apt install python3-selenium
 
 If the script is run on a Raspberry Pi with RaspberryOS, geckodriver must be installed:
+
     wget https://github.com/mozilla/geckodriver/releases/download/v0.23.0/geckodriver-v0.23.0-arm7hf.tar.gz
     tar xvzf geckodriver-v0.23.0-arm7hf.tar.gz && rm -f geckodriver-v0.23.0-arm7hf.tar.gz
     sudo mv geckodriver /usr/local/bin/
