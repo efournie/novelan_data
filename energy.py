@@ -120,11 +120,25 @@ class Energy:
 
 
     def debug(self):
+        '''Print all timestamps and values contained'''
         for i in range(len(self.timestamps)):
             print(f'{self.timestamps[i]}  :  {self.values[i]}      ({(datetime.now() - self.timestamps[i]).seconds} seconds ago)')
 
-    def graph(self, img_filename=''):
+    def lin_graph(self, img_filename=''):
+        '''Plot a linear graph of the total energy consumption over time'''
         plt.plot(self.timestamps, self.values)
+        if img_filename == '':
+            plt.show()
+        else:
+            plt.savefig(img_filename)
+
+    def graph(self, img_filename=''):
+        '''Plot a graph of the energy consumption between all measurement times'''
+        ts = self.timestamps[1:]
+        vals = []
+        for i in range(1, len(self.values)):
+            vals.append(self.values[i] - self.values[i-1])
+        plt.plot(ts, vals)
         if img_filename == '':
             plt.show()
         else:
