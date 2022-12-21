@@ -1,0 +1,2 @@
+Number HPkWhDay  "Heat pump daily kWh  [%.1f kWh]"  <energy> { http="<[http://192.168.1.100:1974/heat_pump/daily_kWh.txt:240000:REGEX((.*))]" }
+
