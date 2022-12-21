@@ -134,11 +134,10 @@ class Energy:
 
     def graph(self, img_filename=''):
         '''Plot a graph of the energy consumption between all measurement times'''
-        ts = self.timestamps[1:]
         vals = []
         for i in range(1, len(self.values)):
             vals.append(self.values[i] - self.values[i-1])
-        plt.plot(ts, vals)
+        plt.stairs(vals, self.timestamps, fill=True)
         if img_filename == '':
             plt.show()
         else:
