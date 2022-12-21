@@ -1,3 +1,4 @@
+import argparse
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import os
@@ -28,7 +29,7 @@ class Energy:
                     self.values.append(value)
 
 
-    def update(self, kWh):
+    def update_history(self, kWh):
         '''Update the "database"'''
         now = datetime.now()
         timestamp = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -44,42 +45,31 @@ class Energy:
         The timestamp closest to end_timestamp will be selected as the end timestamp, the
         one closest to this end timestamp - period seconds will be selected as the start 
         timestamp. If the difference between those two timestamps differs by more than
-        the given error value from period, NaN is returned.
+        the given error value from period, an exception is raised.
         If filename is not empty, save the result into this file (overwrite content)
         end_timestamp should be a datetime, period_sec a number of seconds.
-        If no suitable start or end timestamp is found, NaN is returned.'''
+        If no suitable start or end timestamp is found, an exception is raised.'''
 
         # find the a timestamp as close as possible to end_timestamp
         shortest_delta_end = timedelta.max
         for i in range(len(self.timestamps)):
-            # abs() does not work with timedeltas
-            if end_timestamp > self.timestamps[i]:
-                delta_end = end_timestamp - self.timestamps[i]
-            else:
-                delta_end = self.timestamps[i] - end_timestamp
-            if (delta_end) < shortest_delta_end:
+            delta_end = end_timestamp - self.timestamps[i]
+            if abs(delta_end.total_seconds()) < abs(shortest_delta_end.total_seconds()):
                 shortest_delta_end = delta_end
                 end_idx = i
         
-        # find the first timestamp whose delta with the found end timestamp is shorter or equal to period
-        start_idx = -1
+        # find a starting timestamp whose delta with the found end timestamp is as close to period as possible
+        period_diff_sec = float('inf')
         for i in range(len(self.timestamps)):
             delta_begin = self.timestamps[end_idx] - self.timestamps[i]
-            if delta_begin.seconds <= period_sec:
+            if abs(delta_begin.total_seconds() - period_sec) < period_diff_sec and i != end_idx:
                 start_idx = i
-                break
-        if start_idx == -1:
-            # There is no delta <= period 
-            usage = float('NaN')
-            if filename != '':
-                with open(filename, 'w') as f:
-                    f.write(f'{usage}')
-            return usage
+                period_diff_sec = abs(delta_begin.total_seconds() - period_sec)
 
         # Now check if the difference between the two timestamps is close enough to period
         real_period = self.timestamps[end_idx] - self.timestamps[start_idx]
-        if (period_sec - real_period.seconds) / period_sec > error:
-            usage = float('NaN')
+        if abs(period_sec - real_period.total_seconds()) / period_sec > error:
+            raise ValueError(f'Error is higher than the maximum allowed : abs({period_sec} - {real_period.total_seconds()}) / {period_sec} > {error}. start_idx={start_idx}, end_idx={end_idx}')
         else:
             usage = self.values[end_idx] - self.values[start_idx]
         
@@ -89,7 +79,7 @@ class Energy:
         return usage
 
 
-    def read(self):
+    def read_status(self):
         '''Read total energy usage from the heat pump at the given IP address and update
         the file containing the values.
         Unused fields heating, hot_water, total_heatpump, extra and total_kWh are updated.'''
@@ -126,7 +116,7 @@ class Energy:
         self.extra = energies_values[3]
         self.total_kWh = energies_values[4]
         driver.close()
-        self.update(self.total_kWh)
+        self.update_history(self.total_kWh)
 
 
     def debug(self):
@@ -139,3 +129,23 @@ class Energy:
             plt.show()
         else:
             plt.savefig(img_filename)
+
+def main():
+    # Options
+    parser = argparse.ArgumentParser(description='Read energy usage of a Novelan heat pump')
+    parser.add_argument('-i', '--ip_address', type=str, help='IP address of the heat pump')
+    parser.add_argument('-f', '--history_file', type=str, help='Text file where the energy usage will be stored')
+    parser.add_argument('-u', '--update', action='store_true', help='Update the file containing the heat pump energy usage')
+    parser.add_argument('-d', '--daily_use', type=str, default='', help='Compute the heat pump energy usage for the last 24h and store it into the file given as argument')
+    args = parser.parse_args()
+    e = Energy(args.history_file, args.ip_address)
+    if args.update:
+        e.read_status()
+    elif args.daily_use != '':
+        now = datetime.now()
+        e.read_status()
+        e.usage_since(now, filename=args.daily_use)
+
+
+if __name__ == '__main__':
+    main()

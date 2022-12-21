@@ -37,14 +37,46 @@ If the script is run on a Raspberry Pi with RaspberryOS, chromedriver must be in
 
 The energy.py script can read the total kWh usage of the heat pump and store it in a text file containing datetime and kWh values:
 
-    >>> from datetime import datetime
-    >>> e = Energy('test', '192.168.1.44')
-    >>> e.read()
-    >>> e.read()
-    >>> e.read()
-    >>> e.debug()
-    2022-12-21 10:10:16  :  14591.2      (252 seconds ago)
-    2022-12-21 10:11:15  :  14591.2      (193 seconds ago)
-    2022-12-21 10:13:47  :  14591.9      (41 seconds ago)
-    >>> e.usage_since(datetime(2022, 12, 21, 10, 13, 47), period_sec=152)
-    0.6999999999989086
+    $ python3 energy.py --help
+    usage: energy.py [-h] [-i IP_ADDRESS] [-f HISTORY_FILE] [-u] [-d DAILY_USE]
+
+    Read energy usage of a Novelan heat pump
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -i IP_ADDRESS, --ip_address IP_ADDRESS
+                            IP address of the heat pump
+    -f HISTORY_FILE, --history_file HISTORY_FILE
+                            Text file where the energy usage will be stored
+    -u, --update          Update the file containing the heat pump energy usage
+    -d DAILY_USE, --daily_use DAILY_USE
+                            Compute the heat pump energy usage for the last 24h
+                            and store it into the file given as argument
+
+    $ python3 energy.py -i 192.168.1.44 -f test --update
+    $ nano test    # manually modify values
+    $ python3 energy.py -i 192.168.1.44 -f test --update
+    $ cat test 
+    2022-12-20 10:55:00 = 14590.6
+    2022-12-20 10:55:13 = 14591.6
+    2022-12-20 10:55:50 = 14597.7
+    2022-12-20 10:58:40 = 14597.8
+    2022-12-20 10:59:18 = 14598.4
+    2022-12-20 10:59:27 = 14598.4
+    2022-12-20 11:09:32 = 14600.3
+    2022-12-20 11:20:24 = 14600.7
+    2022-12-21 11:21:23 = 14601.8
+    $ python3 energy.py -i 192.168.1.44 -f test --daily_use daily
+    $ cat daily && echo
+    1.1999999999989086
+    $ cat test 
+    2022-12-20 10:55:00 = 14590.6
+    2022-12-20 10:55:13 = 14591.6
+    2022-12-20 10:55:50 = 14597.7
+    2022-12-20 10:58:40 = 14597.8
+    2022-12-20 10:59:18 = 14598.4
+    2022-12-20 10:59:27 = 14598.4
+    2022-12-20 11:09:32 = 14600.3
+    2022-12-20 11:20:24 = 14600.7
+    2022-12-21 11:21:23 = 14601.8
+    2022-12-21 11:21:38 = 14601.9
