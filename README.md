@@ -36,6 +36,7 @@ If the script is run on a Raspberry Pi with RaspberryOS, chromedriver must be in
     -d, --debug           Debug mode, print results
 
 The energy.py script can read the total kWh usage of the heat pump and store it in a text file containing datetime and kWh values:
+
     >>> from datetime import datetime
     >>> e = Energy('test', '192.168.1.44')
     >>> e.read()
