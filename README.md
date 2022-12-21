@@ -34,3 +34,16 @@ If the script is run on a Raspberry Pi with RaspberryOS, chromedriver must be in
     -o OUTPUT_DIR, --output_dir OUTPUT_DIR
                             Output directory where CSV files will be written
     -d, --debug           Debug mode, print results
+
+The energy.py script can read the total kWh usage of the heat pump and store it in a text file containing datetime and kWh values:
+    >>> from datetime import datetime
+    >>> e = Energy('test', '192.168.1.44')
+    >>> e.read()
+    >>> e.read()
+    >>> e.read()
+    >>> e.debug()
+    2022-12-21 10:10:16  :  14591.2      (252 seconds ago)
+    2022-12-21 10:11:15  :  14591.2      (193 seconds ago)
+    2022-12-21 10:13:47  :  14591.9      (41 seconds ago)
+    >>> e.usage_since(datetime(2022, 12, 21, 10, 13, 47), period_sec=152)
+    0.6999999999989086
