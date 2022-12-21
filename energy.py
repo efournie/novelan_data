@@ -150,6 +150,7 @@ def main():
     parser.add_argument('-f', '--history_file', type=str, help='Text file where the energy usage will be stored')
     parser.add_argument('-u', '--update', action='store_true', help='Update the file containing the heat pump energy usage')
     parser.add_argument('-d', '--daily_use', type=str, default='', help='Compute the heat pump energy usage for the last 24h and store it into the file given as argument')
+    parser.add_argument('-g', '--graph', type=str, default='', help='Generate a bar plot from all the saved values and save it to this file')
     args = parser.parse_args()
     e = Energy(args.history_file, args.ip_address)
     if args.update:
@@ -158,6 +159,8 @@ def main():
         now = datetime.now()
         e.read_status()
         e.usage_since(now, filename=args.daily_use)
+    elif args.graph != '':
+        e.graph(args.graph)
 
 
 if __name__ == '__main__':
