@@ -138,6 +138,7 @@ class Energy:
         for i in range(1, len(self.values)):
             vals.append(self.values[i] - self.values[i-1])
         plt.stairs(vals, self.timestamps, fill=True)
+        plt.xticks([])
         if img_filename == '':
             plt.show()
         else:
