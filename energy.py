@@ -1,6 +1,7 @@
 import argparse
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
@@ -57,7 +58,7 @@ class Energy:
             if abs(delta_end.total_seconds()) < abs(shortest_delta_end.total_seconds()):
                 shortest_delta_end = delta_end
                 end_idx = i
-        
+
         # find a starting timestamp whose delta with the found end timestamp is as close to period as possible
         period_diff_sec = float('inf')
         for i in range(len(self.timestamps)):
@@ -72,7 +73,7 @@ class Energy:
             raise ValueError(f'Error is higher than the maximum allowed : abs({period_sec} - {real_period.total_seconds()}) / {period_sec} > {error}. start_idx={start_idx}, end_idx={end_idx}')
         else:
             usage = self.values[end_idx] - self.values[start_idx]
-        
+
         if filename != '':
             with open(filename, 'w') as f:
                 f.write(f'{usage}')
@@ -135,14 +136,32 @@ class Energy:
     def graph(self, img_filename=''):
         '''Plot a graph of the energy consumption between all measurement times'''
         vals = []
+        ts = []
+        filt_len = 13
         for i in range(1, len(self.values)):
             vals.append(self.values[i] - self.values[i-1])
-        plt.stairs(vals, self.timestamps, fill=True)
-        plt.xticks([])
+            ts.append(self.timestamps[i])
+        vals_filter = np.convolve(np.pad(vals, filt_len // 2, 'edge'), np.ones(filt_len), mode='valid')
+        # Clip to the maximum value that is < 300kWh in case there are outliers due to non logged days
+        maxval = 0
+        for val in vals_filter:
+            if val > maxval and val < 300:
+                maxval = val
+        vals_filter = np.clip(vals_filter, 0, maxval)
+        plt.figure(figsize=(16,6))
+        plt.plot(ts, vals_filter)
+        plt.grid(True, 'both', 'y')
         if img_filename == '':
             plt.show()
         else:
             plt.savefig(img_filename)
+
+    def export_hourly(self, filename, filter_hours):
+        vals = []
+        for i in range(1, len(self.values)):
+            vals.append(self.values[i] - self.values[i-1])
+        vals_filter = np.convolve(vals, np.ones(filter_hours), mode='valid') 
+        # TODO: export file
 
 def main():
     # Options
@@ -152,6 +171,8 @@ def main():
     parser.add_argument('-u', '--update', action='store_true', help='Update the file containing the heat pump energy usage')
     parser.add_argument('-d', '--daily_use', type=str, default='', help='Compute the heat pump energy usage for the last 24h and store it into the file given as argument')
     parser.add_argument('-g', '--graph', type=str, default='', help='Generate a bar plot from all the saved values and save it to this file')
+    parser.add_argument('-e', '--export', type=str, default='', help='Export hourly energy usage to a file')
+    parser.add_argument('--filter', type=int, default=24, help='Filter hourly energy usage with a sliding window of FILTER hours')
     args = parser.parse_args()
     e = Energy(args.history_file, args.ip_address)
     if args.update:
@@ -160,8 +181,11 @@ def main():
         now = datetime.now()
         e.read_status()
         e.usage_since(now, filename=args.daily_use)
-    elif args.graph != '':
-        e.graph(args.graph)
+    else:
+        if args.graph != '':
+            e.graph(args.graph)
+        if args.export != '':
+            e.export_hourly(args.export, args.filter)
 
 
 if __name__ == '__main__':
