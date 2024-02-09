@@ -10,6 +10,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+import sys
 
 from novelan import log
 class Energy:
@@ -84,6 +85,9 @@ class Energy:
         '''Read total energy usage from the heat pump at the given IP address and update
         the file containing the values.
         Unused fields heating, hot_water, total_heatpump, extra and total_kWh are updated.'''
+        ret = os.system(f"ping -c 1 -W 1 {self.ip_address} >/dev/null 2>&1")
+        if ret != 0:
+            sys.exit(f"{self.ip_address} can't be reached")
         opts = Options()
         opts.headless = True
         driver = webdriver.Chrome(options=opts)

@@ -15,7 +15,7 @@ class Temperature:
         '''Write current temperature value in a file. Contents of the file will be overwritten.'''
         with open(filename, 'w') as f:
             f.write(f'{self.value}')
-        
+
 
 class HeatPumpStatus():
     '''Global heat pump status class'''

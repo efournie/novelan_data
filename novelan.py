@@ -1,5 +1,6 @@
 import argparse
 from datetime import datetime
+import os
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -7,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+import sys
 
 from temperatures import HeatPumpStatus
 
@@ -23,6 +25,10 @@ def main():
     parser.add_argument('-d', '--debug', action='store_true', help='Debug mode, print results')
     args = parser.parse_args()
 
+    ret = os.system(f"ping -c 1 -W 1 {args.ip_address} > /dev/null 2>&1")
+    if ret != 0:
+        sys.exit(f"{args.ip_address} can't be reached (ret={ret})")
+
     # Login page
     if args.debug:
         log('Initialization...')
@@ -34,7 +40,7 @@ def main():
     assert 'Heatpump' in driver.title
     if args.debug:
         log('Start page reached')
-    # Default password is empty, just send return 
+    # Default password is empty, just send return
     elem = driver.find_element(By.ID, 'password_prompt_input')
     elem.clear()
     elem.send_keys(Keys.RETURN)

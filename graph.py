@@ -40,9 +40,9 @@ class Graph:
         ts = []
         filt_len = 11
         plt.figure(figsize=(16,6))
-        plt.plot(self.timestamps, self.values, 'b', label=self.name1)
         if self.double:
             plt.plot(self.timestamps2, self.values2, 'r', label=self.name2)
+        plt.plot(self.timestamps, self.values, 'b', label=self.name1)
         plt.grid(True, 'both', 'y')
         plt.legend()
         if img_filename == '':
