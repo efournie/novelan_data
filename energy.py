@@ -148,15 +148,42 @@ class Energy:
             if delta.seconds > 0 and (3600 * diff / delta.seconds) < 300:
                 vals.append(3600 * diff / delta.seconds)
                 ts.append(self.timestamps[i])
-        vals_filter = np.convolve(np.pad(vals, filt_len // 2, 'reflect'), np.ones(filt_len), mode='valid')
+        vals_filter = np.convolve(np.pad(vals, filt_len // 2, 'reflect'), np.ones(filt_len)/filt_len, mode='valid')
         # Clip to the maximum value that is < 300kWh in case there are outliers due to non logged days
         maxval = 0
         for val in vals_filter:
             if val > maxval and val < 300:
                 maxval = val
         vals_filter = np.clip(vals_filter, 0, maxval)
-        plt.figure(figsize=(16,6))
-        plt.plot(ts, vals_filter)
+
+        # Add electricity to graph if file exists
+        # TODO: file name argument
+        elec_file = '/var/www/temp_sensors/heat_pump/hp.log'
+        if os.path.exists(elec_file):
+            elec_timestamps = []
+            list_kWh = []
+            first_row = True
+            with open(elec_file, 'r') as f:
+                lines = f.readlines()
+                for l in lines:
+                    timestamp = datetime.strptime(l.split(' | ')[0], '%Y-%m-%d %H:%M:%S')
+                    kWh = float(l.split(' | ')[1])
+                    if first_row:
+                        first_row = False
+                    else:
+                        kWh_diff = kWh - prev_kWh
+                        tdelta = timestamp - prev_timestamp
+                        days_diff = tdelta.days
+                        mean_kWh_per_day = kWh_diff / days_diff
+                        list_kWh.append(mean_kWh_per_day)
+                        elec_timestamps.append(timestamp)
+                    prev_kWh = kWh
+                    prev_timestamp = timestamp
+
+        fig, ax = plt.subplots(figsize=(16,6))
+        ax.plot(ts, vals_filter * 24, 'b', label='heat (kWh/day)')
+        ax.plot(elec_timestamps, list_kWh, 'r', label='electricity (kWh/day)')
+        ax.legend()
         plt.grid(True, 'both', 'y')
         if img_filename == '':
             plt.show()
