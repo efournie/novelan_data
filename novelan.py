@@ -33,7 +33,7 @@ def main():
     if args.debug:
         log('Initialization...')
     opts = Options()
-    opts.headless = True
+    opts.add_argument('--headless')
     driver = webdriver.Chrome(options=opts)
     driver.get(f'http://{args.ip_address}/Webserver/index.html')
     _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//html/body')))
@@ -50,12 +50,12 @@ def main():
     # Status page
     # Wait until page is loaded, then navigate to temperatures
     _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'Navigation')))
-    menu = driver.find_element_by_id('Navigation')
+    menu = driver.find_element('id', 'Navigation')
     ActionChains(driver).move_to_element(menu).perform()
-    info = driver.find_element_by_xpath("//ul[@class='nav']/li/a")
+    info = driver.find_element('xpath', "//ul[@class='nav']/li/a")
     ActionChains(driver).move_to_element(info).perform()
     # Get list of menu entries, then navigate to the first one ("Temperaturen")
-    menu_elements = driver.find_elements_by_xpath("//ul[@class='nav']/li/ul/li")
+    menu_elements = driver.find_elements('xpath', "//ul[@class='nav']/li/ul/li")
     ActionChains(driver).move_to_element(menu_elements[0]).click().perform()
     _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'output_field')))
     if args.debug:
