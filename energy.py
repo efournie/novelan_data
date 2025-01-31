@@ -91,10 +91,11 @@ class Energy:
         opts = Options()
         opts.headless = True
         driver = webdriver.Chrome(options=opts)
+        driver.set_window_size(1600, 1600)
         driver.get(f'http://{self.ip_address}/Webserver/index.html')
         _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//html/body')))
         assert 'Heatpump' in driver.title
-        # Default password is empty, just send return 
+        # Default password is empty, just send return
         elem = driver.find_element(By.ID, 'password_prompt_input')
         elem.clear()
         elem.send_keys(Keys.RETURN)
@@ -102,12 +103,12 @@ class Energy:
         # Status page
         # Wait until page is loaded, then navigate to energy
         _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'Navigation')))
-        menu = driver.find_element_by_id('Navigation')
+        menu = driver.find_element(By.ID,'Navigation')
         ActionChains(driver).move_to_element(menu).perform()
-        info = driver.find_element_by_xpath("//ul[@class='nav']/li/a")
+        info = driver.find_element('xpath', "//ul[@class='nav']/li/a")
         ActionChains(driver).move_to_element(info).perform()
         # Get list of menu entries, then navigate to the 9th one ("Wärmemenge")
-        menu_elements = driver.find_elements_by_xpath("//ul[@class='nav']/li/ul/li")
+        menu_elements = driver.find_elements('xpath', "//ul[@class='nav']/li/ul/li")
         ActionChains(driver).move_to_element(menu_elements[8]).click().perform()
         _ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'output_field')))
         # Get values
