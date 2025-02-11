@@ -138,7 +138,7 @@ class Energy:
         else:
             plt.savefig(img_filename)
 
-    def graph(self, img_filename=''):
+    def graph(self, img_filename='', graph_days=-1, small=False):
         '''Plot a graph of the energy consumption between all measurement times'''
         vals = []
         ts = []
@@ -181,9 +181,14 @@ class Energy:
                     prev_kWh = kWh
                     prev_timestamp = timestamp
 
-        fig, ax = plt.subplots(figsize=(16,6))
+        if small:
+            fig, ax = plt.subplots(figsize=(8,3))
+        else:
+            fig, ax = plt.subplots(figsize=(12,5))
         ax.plot(ts, vals_filter * 24, 'b', label='heat (kWh/day)')
         ax.plot(elec_timestamps, list_kWh, 'r', label='electricity (kWh/day)')
+        if graph_days != -1:
+            plt.xlim(left = ts[-1] - timedelta(days=graph_days), right = ts[-1] + timedelta(days=1))
         ax.legend()
         plt.grid(True, 'both', 'y')
         if img_filename == '':
@@ -195,7 +200,7 @@ class Energy:
         vals = []
         for i in range(1, len(self.values)):
             vals.append(self.values[i] - self.values[i-1])
-        vals_filter = np.convolve(vals, np.ones(filter_hours), mode='valid') 
+        vals_filter = np.convolve(vals, np.ones(filter_hours), mode='valid')
         # TODO: export file
 
 def main():
@@ -207,6 +212,8 @@ def main():
     parser.add_argument('-d', '--daily_use', type=str, default='', help='Compute the heat pump energy usage for the last 24h and store it into the file given as argument')
     parser.add_argument('-g', '--graph', type=str, default='', help='Generate a bar plot from all the saved values and save it to this file')
     parser.add_argument('-e', '--export', type=str, default='', help='Export hourly energy usage to a file')
+    parser.add_argument('--graph_days', type=int, default=-1, help='Limit the graph to the last N days. No effect if -g is not set.')
+    parser.add_argument('-s', '--small', action='store_true', help='Make a smaller graph')
     parser.add_argument('--filter', type=int, default=24, help='Filter hourly energy usage with a sliding window of FILTER hours')
     args = parser.parse_args()
     e = Energy(args.history_file, args.ip_address)
@@ -218,7 +225,7 @@ def main():
         e.usage_since(now, filename=args.daily_use)
     else:
         if args.graph != '':
-            e.graph(args.graph)
+            e.graph(args.graph, args.graph_days, args.small)
         if args.export != '':
             e.export_hourly(args.export, args.filter)
 
