@@ -90,7 +90,7 @@ class Graph:
         if filter:
             self.values = self.filter(self.values)
         if not yearly:
-            plt.figure(figsize=(16,6))
+            plt.figure(figsize=(12,5))
             if self.double:
                 plt.plot(self.timestamps2, self.values2, 'r', label=self.name2)
             plt.plot(self.timestamps, self.values, 'b', label=self.name1)
