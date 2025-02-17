@@ -1,2 +1,0 @@
-Number HPReturn  "Heat pump return  [%.1f °C]"  <temperature> { http="<[http://192.168.1.100:1974/heat_pump/t_out.temp:240000:REGEX((.*))]" }
-

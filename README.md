@@ -9,7 +9,7 @@ The status page is as far as I know only available in german but the script pars
 
 The heat pump temperatures will be written in CSV files in the location set by the '--output_dir' argument. Current values will also be stored in *.temp files.
 
-The current values can be used as input for OpenHab items. Example item files are provided, the URL pointing to the temperature files should be modified to match the target system. 
+The current values can for example be used as OpenHab items using a HTTP Binding.
 
 ## Requirements
 The script uses Selenium
