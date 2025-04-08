@@ -14,8 +14,8 @@ class Graph:
         self.timestamps2 = []
         self.values2 = []
         self.double = False
-        self.name1 = os.path.basename(filename).split('.')[0]
-        self.name2 = os.path.basename(filename2).split('.')[0]
+        self.name1 = os.path.basename(filename).split('.')[0].replace('hist_', '')
+        self.name2 = os.path.basename(filename2).split('.')[0].replace('hist_', '')
         # load "database" from filename
         if os.path.exists(self.filename):
             with open(self.filename, 'r') as f:
@@ -85,18 +85,32 @@ class Graph:
             filt_val.append(val)
         return filt_val
 
-    def graph(self, img_filename='', filter=False, yearly=False):
+    def graph(self, img_filename='', filter=False, yearly=False, graph_days=-1, width=12):
         '''Plot a graph of the energy consumption between all measurement times'''
         if filter:
             self.values = self.filter(self.values)
-        if not yearly:
-            plt.figure(figsize=(12,5))
+
+        if graph_days == -1:
+            timestamps = self.timestamps
+            values = self.values
             if self.double:
-                plt.plot(self.timestamps2, self.values2, 'r', label=self.name2)
-            plt.plot(self.timestamps, self.values, 'b', label=self.name1)
+                timestamps2 = self.timestamps2
+                values2 = self.values2
+        else:
+            timestamps = [i for i in self.timestamps if self.timestamps[-1] - i <= timedelta(days=graph_days)]
+            values = self.values[ -len(timestamps): ]
+            if self.double:
+                timestamps2 = [i for i in self.timestamps2 if self.timestamps2[-1] - i <= timedelta(days=graph_days)]
+                values2 = self.values2[ -len(timestamps2): ]
+
+        if not yearly:
+            plt.figure(figsize=(width, width/2.4))
+            if self.double:
+                plt.plot(timestamps2, values2, 'r', label=self.name2)
+            ax = plt.plot(timestamps, values, 'b', label=self.name1)
             plt.grid(True, 'both', 'y')
         else:
-            split_ts, split_vals = self.split_years(self.timestamps, self.values)
+            split_ts, split_vals = self.split_years(timestamps, values)
             last_year = split_ts[-1][0].year
             for timestamps, values in zip(split_ts, split_vals):
                 year = timestamps[0].year
@@ -105,7 +119,7 @@ class Graph:
                     t = timestamps[idx]
                     t2 = datetime(last_year, t.month, t.day, t.hour, t.minute, t.second, t.microsecond)
                     new_timestamps.append(t2)
-                plt.plot(new_timestamps, values, label=f'{year}')
+                ax = plt.plot(new_timestamps, values, label=f'{year}')
 
         plt.legend()
         if img_filename == '':
@@ -119,13 +133,15 @@ def main():
     parser.add_argument('-f', '--history_file', type=str, help='File where the timestamps and values are stored')
     parser.add_argument('--f2', type=str, default='', help='Second values file (optional)')
     parser.add_argument('-g', '--graph', type=str, default='', help='Generate a graph from the saved values and save it to this file')
+    parser.add_argument('--graph_days', type=int, default=-1, help='Limit the graph to the last N days. No effect if -g is not set.')
+    parser.add_argument('--graph_width', type=int, default=12, help='Width of the graph in inches.')
     parser.add_argument('-y', '--yearly', action='store_true', help='Superimpose yearly graphs.')
     parser.add_argument('--filter', action='store_true', help='Smooth the graphs.')
     parser.add_argument('--filter_len', type=int, default=35, help='Length of the filter.')
     parser.add_argument('--monotonous', action='store_true', help='Values are monotonously increasing, first convert them to differences between consecutive values.')
     args = parser.parse_args()
     e = Graph(args.history_file, args.f2, args.filter_len, args.monotonous)
-    e.graph(args.graph, args.filter, args.yearly)
+    e.graph(args.graph, args.filter, args.yearly, args.graph_days, args.graph_width)
 
 
 if __name__ == '__main__':
