@@ -146,9 +146,10 @@ class Energy:
         for i in range(1, len(self.values)):
             delta = self.timestamps[i] - self.timestamps[i-1]
             diff = self.values[i] - self.values[i-1]
-            if delta.seconds > 0 and (3600 * diff / delta.seconds) < 300:
-                vals.append(3600 * diff / delta.seconds)
-                ts.append(self.timestamps[i])
+            delta_hours = delta.days * 24 + delta.seconds / 3600
+            value = diff / delta_hours
+            vals.append(value)
+            ts.append(self.timestamps[i])
         vals_filter = np.convolve(np.pad(vals, filt_len // 2, 'reflect'), np.ones(filt_len)/filt_len, mode='valid')
         # Clip to the maximum value that is < 300kWh in case there are outliers due to non logged days
         maxval = 0
