@@ -138,7 +138,7 @@ class Energy:
         else:
             plt.savefig(img_filename)
 
-    def graph(self, img_filename='', graph_days=-1, small=False):
+    def graph(self, img_filename='', graph_days=-1, small=False, elec_file='/var/www/temp_sensors/heat_pump/hp.log'):
         '''Plot a graph of the energy consumption between all measurement times'''
         vals = []
         ts = []
@@ -147,20 +147,15 @@ class Energy:
             delta = self.timestamps[i] - self.timestamps[i-1]
             diff = self.values[i] - self.values[i-1]
             delta_hours = delta.days * 24 + delta.seconds / 3600
-            value = diff / delta_hours
-            vals.append(value)
-            ts.append(self.timestamps[i])
+            if delta_hours != 0:
+                value = diff / delta_hours
+                vals.append(value)
+                ts.append(self.timestamps[i])
+            else:
+                print(f'Error: delta_hours = 0! timestamp = {self.timestamps[i]}, diff = {diff}')
         vals_filter = np.convolve(np.pad(vals, filt_len // 2, 'reflect'), np.ones(filt_len)/filt_len, mode='valid')
-        # Clip to the maximum value that is < 300kWh in case there are outliers due to non logged days
-        maxval = 0
-        for val in vals_filter:
-            if val > maxval and val < 300:
-                maxval = val
-        vals_filter = np.clip(vals_filter, 0, maxval)
 
         # Add electricity to graph if file exists
-        # TODO: file name argument
-        elec_file = '/var/www/temp_sensors/heat_pump/hp.log'
         if os.path.exists(elec_file):
             elec_timestamps = []
             list_kWh = []
