@@ -85,7 +85,7 @@ class Graph:
             filt_val.append(val)
         return filt_val
 
-    def graph(self, img_filename='', filter=False, yearly=False, graph_days=-1, width=12):
+    def graph(self, img_filename='', filter=False, yearly=False, graph_days=-1, width=12, vmin=-1, vmax=-1):
         '''Plot a graph of the energy consumption between all measurement times'''
         if filter:
             self.values = self.filter(self.values)
@@ -121,6 +121,9 @@ class Graph:
                     new_timestamps.append(t2)
                 ax = plt.plot(new_timestamps, values, label=f'{year}')
 
+        if vmin != vmax:
+            plt.gca().set_ylim([vmin, vmax])
+
         plt.legend()
         if img_filename == '':
             plt.show()
@@ -138,10 +141,12 @@ def main():
     parser.add_argument('-y', '--yearly', action='store_true', help='Superimpose yearly graphs.')
     parser.add_argument('--filter', action='store_true', help='Smooth the graphs.')
     parser.add_argument('--filter_len', type=int, default=35, help='Length of the filter.')
+    parser.add_argument('--vmin', type=float, default=-1, help='Vertical axis min value.')
+    parser.add_argument('--vmax', type=float, default=-1, help='Vertical axis max value.')
     parser.add_argument('--monotonous', action='store_true', help='Values are monotonously increasing, first convert them to differences between consecutive values.')
     args = parser.parse_args()
     e = Graph(args.history_file, args.f2, args.filter_len, args.monotonous)
-    e.graph(args.graph, args.filter, args.yearly, args.graph_days, args.graph_width)
+    e.graph(args.graph, args.filter, args.yearly, args.graph_days, args.graph_width, args.vmin, args.vmax)
 
 
 if __name__ == '__main__':
