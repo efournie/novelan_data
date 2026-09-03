@@ -85,8 +85,10 @@ class Graph:
             filt_val.append(val)
         return filt_val
 
-    def graph(self, img_filename='', filter=False, yearly=False, graph_days=-1, width=12, vmin=-1, vmax=-1):
+    def graph(self, img_filename='', filter=False, yearly=False, graph_days=-1, width=12, height=-1, vmin=-1, vmax=-1):
         '''Plot a graph of the energy consumption between all measurement times'''
+        if height == -1:
+            height = width / 2.4
         if filter:
             self.values = self.filter(self.values)
 
@@ -104,7 +106,7 @@ class Graph:
                 values2 = self.values2[ -len(timestamps2): ]
 
         if not yearly:
-            plt.figure(figsize=(width, width/2.4))
+            plt.figure(figsize=(width, height))
             if self.double:
                 plt.plot(timestamps2, values2, 'r', label=self.name2)
             ax = plt.plot(timestamps, values, 'b', label=self.name1)
@@ -138,6 +140,7 @@ def main():
     parser.add_argument('-g', '--graph', type=str, default='', help='Generate a graph from the saved values and save it to this file')
     parser.add_argument('--graph_days', type=int, default=-1, help='Limit the graph to the last N days. No effect if -g is not set.')
     parser.add_argument('--graph_width', type=int, default=12, help='Width of the graph in inches.')
+    parser.add_argument('--graph_height', type=float, default=-1, help='Graph height.')
     parser.add_argument('-y', '--yearly', action='store_true', help='Superimpose yearly graphs.')
     parser.add_argument('--filter', action='store_true', help='Smooth the graphs.')
     parser.add_argument('--filter_len', type=int, default=35, help='Length of the filter.')
@@ -146,7 +149,7 @@ def main():
     parser.add_argument('--monotonous', action='store_true', help='Values are monotonously increasing, first convert them to differences between consecutive values.')
     args = parser.parse_args()
     e = Graph(args.history_file, args.f2, args.filter_len, args.monotonous)
-    e.graph(args.graph, args.filter, args.yearly, args.graph_days, args.graph_width, args.vmin, args.vmax)
+    e.graph(args.graph, args.filter, args.yearly, args.graph_days, args.graph_width, args.graph_height, args.vmin, args.vmax)
 
 
 if __name__ == '__main__':
