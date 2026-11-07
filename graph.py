@@ -22,7 +22,10 @@ class Graph:
                 lines = f.readlines()
                 for l in lines:
                     timestamp = datetime.strptime(l.split(' = ')[0], '%Y-%m-%d %H:%M:%S')
-                    value = float(l.split(' = ')[1].replace('\n', ''))
+                    try:
+                        value = float(l.split(' = ')[1].replace('\n', ''))
+                    except:
+                        value = 0
                     self.timestamps.append(timestamp)
                     self.values.append(value)
         if filename2 != '' and os.path.exists(self.filename2):
